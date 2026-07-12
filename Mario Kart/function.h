@@ -3,7 +3,7 @@
 
 typedef struct DADOS personagem;
 typedef struct NODE node;
-typedef struct corrida;
+typedef struct PISTA corrida; // Corrigido de 'struct corrida'
 typedef struct NODE_CORRIDA node_corrida;
 typedef struct ITEM itens;
 typedef struct NODE_HISTORICO node_historico;
@@ -12,13 +12,13 @@ typedef struct NODE_OFICINA node_oficina;
 void print_menu();
 
 // MÓDULO 1 - CENTRAL DE CORRIDAS
-void cadastrar_corrida(node_corrida** inicio, node_corrida** fim);
-void realizar_corrida(node_corrida** inicio, node_corrida** fim, node* lista_pilotos, node_historico** pilha_historico);
+void cadastrar_corrida(node_corrida** inicio_fila); // Removido '**fim' que não existe no .c!!!
+void realizar_corrida(node_corrida** inicio_fila, node* lista_pilotos); // Removidos parâmetros extras
 
 // MÓDULO 2 – REGISTRO DE PILOTOS
 void criar_personagem(node** inicio);
-void procurar_personagem(node* inicio);
-void listar_personagens_banidos(node* inicio);
+void procurar_personagem(node** inicio); // Ajustado para node** igual ao .c!!!
+void pers_banidos(); // Nome corrigido para bater com o .c
 void ordenar(node* cabeca);
 
 // MÓDULO 3 – ITENS
@@ -30,13 +30,17 @@ void menu_itens_gerenciar(itens* estoque);
 void item_dist(node* lista_pilotos, itens* estoque);
 
 // MÓDULO 4 – HISTÓRICO (PILHA)
-void empilhar_historico(node_historico** topo, char* pista, char* vencedor, int qtd_pilotos);
-void exibir_historico(node_historico* topo);
+void exibir_historico(node* lista_pilotos); // Ajustado para bater com o .c!!!
 
 // MÓDULO 5 – OFICINA
-void oficina(node_oficina** fila_oficina, node* lista_pilotos);
+void oficina(node* lista_pilotos);
 void registrar_manutencao(node_oficina** topo_oficina, char* nome, int status);
 void iniciar_reparo(node_oficina** topo_oficina, node* lista_pilotos);
 void exibir_fila_oficina(node_oficina* topo_oficina);
+
+//MÓDULO 6 - SISTEMA E INFORMAÇÕES GERAIS
+void atualizar_pontuacao_corrida(node* lista_pilotos, int posicao, node* piloto);
+void exibir_ranking_campeonato(node* lista_pilotos);
+void determinar_campeao_temporada(node* lista_pilotos);
 
 #endif
