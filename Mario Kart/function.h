@@ -45,7 +45,6 @@ void exibir_ranking_campeonato(node* lista_pilotos);
 void determinar_campeao_temporada(node* lista_pilotos);
 
 // SISTEMA DE ARMAZENAMENTO
-
 void salvar(node* lista_pilotos);
 void carregar(node** lista_pilotos, oficina** fila_oficina);
 void salvar_historico(node_historico* pilha_historico);
