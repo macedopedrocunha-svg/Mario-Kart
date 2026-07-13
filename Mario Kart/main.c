@@ -9,7 +9,6 @@ int main() {
     setlocale(LC_ALL, "Portuguese");
     srand(time(NULL));
 
-    // Ponteiros das Estruturas de Dados Obrigatórias do Trabalho
     node* lista_pilotos = NULL;            // 1. Lista Encadeada
     node_corrida* fila_corrida_inicio = NULL; // 2. Fila (Início)
     node_corrida* fila_corrida_fim = NULL;    // 2. Fila (Fim)
@@ -19,6 +18,10 @@ int main() {
     itens estoque_central;
     inicializar_estoque(&estoque_central);
 
+    printf("\nIniciando o Sistema FMKR...\n");
+    carregar_pilotos_e_oficina(&lista_pilotos, &fila_oficina);
+    carregar_historico(&pilha_historico);
+
     int resp_menu, cont_acidentes = 0;
     do {
         print_menu();
@@ -27,7 +30,7 @@ int main() {
             resp_menu = -1;
             getchar();
         }
-        getchar(); // Limpa o buffer
+        getchar();
 
         switch (resp_menu) {
         case 1: {
@@ -70,6 +73,11 @@ int main() {
             break;
         case 0:
             determinar_campeao_temporada(lista_pilotos);
+
+            printf("\nSalvando o progresso da temporada...\n");
+            salvar_pilotos(lista_pilotos);
+            salvar_historico(pilha_historico);
+
             printf("Precione ENTER para sair... ");
             getchar();
             printf("\nEncerrando o sistema oficial da FMKR. Até mais!\n");
