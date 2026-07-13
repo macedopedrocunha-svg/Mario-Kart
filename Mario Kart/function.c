@@ -5,7 +5,7 @@
 
 typedef struct DADOS {
     char piloto[30];
-    int categ; // 0 - Leve, 1 - Médio, 2 - Pesado       AINDA NÃO SERVE PRA NADA (FAZER)
+    int categ; // 0 - Leve, 1 - Médio, 2 - Pesado
     int cont_trofeu, st_pil; // 0 - Disponível, 1 - Acidentado, 2 - Banido
     int v_kart, ac, ctrl, resist, st_kart; // 0 - Operacional, 1 - Danificado. 2 - Destruído
     int hp;
@@ -25,8 +25,7 @@ typedef struct ITEM {
 
 typedef struct PISTA {
     int pista; // 0 - Circuito Luigi, 1 - Circuito Mario , 2 - Circuito Peach , 3 - Circuito Yoshi  , 4 - Circuito Donkey Kong , 5 - Circuito Wario , 6 - Circuito Bowser, 7 - Circuito Rainbow Road
-    int num_voltas;
-    int dificuldade; // de 1 a 100
+    int num_voltas, dificuldade;
     int status; // 0 - aguardando, 1 - em andamento, 2 - finalizada
 }corrida;
 
@@ -39,7 +38,7 @@ typedef struct NODE_HISTORICO {
     char pista_nome[50];
     char vencedor_nome[30];
     int total_pilotos;
-    struct NODE_HISTORICO* topo; // Aponta para a corrida anterior na pilha
+    struct NODE_HISTORICO* topo;
 } node_historico;
 
 typedef struct OFICINA {
@@ -138,7 +137,7 @@ void menu_oficina(oficina** fila_oficina, node* lista_pilotos) {
         printf("===============================\n");
         printf("Escolha uma opção: ");
         scanf("%d", &opcao_oficina);
-        getchar(); // Limpa o buffer
+        getchar();
 
         switch (opcao_oficina) {
         case 1:
@@ -158,7 +157,6 @@ void menu_oficina(oficina** fila_oficina, node* lista_pilotos) {
             printf("\n-------------------------------------\n");
             printf("Iniciar reparo\n");
             printf("-------------------------------------\n");
-            // passando a fila e a lista geral de pilotos para atualizar o grid
             iniciar_reparo(&fila_oficina, lista_pilotos);
             break;
         case 3:
@@ -300,7 +298,6 @@ void procurar_personagem(node** inicio) {
 }
 
 void pers_banidos() {
-    // APENAS ABRIR O ARQUIVO DE PERSONAGENS BANIDOS E IMPRIMIR
     char token_nome[30];
     int token_trofeu, encontrou = 0;
     FILE* arq = fopen("ban.txt", "r");
@@ -405,7 +402,7 @@ void cadastrar_corrida(node_corrida** inicio_fila) {
                 }
             } while (novo->dados_corrida.num_voltas < 1 || novo->dados_corrida.num_voltas > 7);
 
-            novo->dados_corrida.status = 0; // Aguardando
+            novo->dados_corrida.status = 0;
             novo->prox = NULL;
 
             if (*inicio_fila == NULL || novo->dados_corrida.dificuldade < (*inicio_fila)->dados_corrida.dificuldade) {
@@ -481,7 +478,8 @@ void menu_itens_gerenciar(node* lista_pilotos, itens* estoque) {
                     }
                     temp_piloto = temp_piloto->prox;
                 }
-                printf("Bananas: %d\nCascos Verdes: %d\nCogumelos: %d\nCascos Vermelhos: %d\nBob-Ombs: %d\nRaios: %d\nBullet Bills: %d\nCascos Azuis: %d", contador[0], contador[1], contador[2], contador[3], contador[4], contador[5], contador[6], contador[7]);
+                printf("Bananas: %d\nCascos Verdes: %d\nCogumelos: %d\nCascos Vermelhos: %d\nBob-Ombs: %d\nRaios: %d\nBullet Bills: %d\nCascos Azuis: %d",
+                    contador[0], contador[1], contador[2], contador[3], contador[4], contador[5], contador[6], contador[7]);
             }
             printf("===================================\n");
             break; 
@@ -612,7 +610,6 @@ void exibir_historico(node* lista_pilotos) {
 
 // MODULO 5 - OFICINA 
 
-// insere na fila respeitando a prioridade: Destruído (2) > Danificado (1)
 void registrar_manutencao(oficina** topo_oficina, char* nome, int status) {
     oficina* novo = (oficina*)malloc(sizeof(oficina));
     if (!novo) {
@@ -623,11 +620,10 @@ void registrar_manutencao(oficina** topo_oficina, char* nome, int status) {
     novo->status_kart = status;
     novo->prox = NULL;
 
-    // se a fila estiver vazia ou o novo tiver maior prioridade que o primeiro
     if (*topo_oficina == NULL || status > (*topo_oficina)->status_kart) {
         novo->prox = *topo_oficina;
         *topo_oficina = novo;
-        printf("[✔] Kart de %s enviado para a oficina com prioridade máxima!\n", nome);
+        printf("Kart de %s enviado para a oficina com prioridade máxima!\n", nome);
         return;
     }
 
@@ -639,19 +635,17 @@ void registrar_manutencao(oficina** topo_oficina, char* nome, int status) {
 
     novo->prox = atual->prox;
     atual->prox = novo;
-    printf("[✔] Kart de %s adicionado à fila de reparos.\n", nome);
+    printf("Kart de %s adicionado à fila de reparos.\n", nome);
 }
 
-// remove o primeiro da fila (maior prioridade), conserta e atualiza no grid de pilotos
 void iniciar_reparo(oficina** topo_oficina, node* lista_pilotos) {
     if (*topo_oficina == NULL) {
-        printf("\n[!] Nenhum kart aguardando manutenção na oficina.\n");
+        printf("\nNenhum kart aguardando manutenção na oficina.\n");
         return;
     }
 
     oficina* repara_agora = *topo_oficina;
 
-    // procura o piloto na lista geral para voltar o status do kart para Operacional (0)
     node* p_atual = lista_pilotos;
     while (p_atual != NULL) {
         if (strcmp(p_atual->dado.piloto, repara_agora->piloto_nome) == 0) {
@@ -664,18 +658,15 @@ void iniciar_reparo(oficina** topo_oficina, node* lista_pilotos) {
     printf("\n===================================\n");
     printf(" REPARO CONCLUÍDO PELO PROFESSOR E. GADD \n");
     printf("===================================\n");        
-    // agora usando o nome do piloto e o modelo do Kart recuperado com segurança:
     printf("O Kart do piloto %s foi totalmente reparado!\n", repara_agora->piloto_nome);
     printf("Situação anterior: %s\n", (repara_agora->status_kart == 2) ? " Estava Destruído" : " Estava Danificado");
     printf("Status atualizado para: OPERACIONAL! \n");
     printf("===================================\n");
 
-    // varre a fila e libera a memória do nó da oficina
     *topo_oficina = (*topo_oficina)->prox;
     free(repara_agora);
 }
 
-// exibe quem está na fila e a gravidade do problema
 void exibir_fila_oficina(oficina* topo_oficina) {
     if (topo_oficina == NULL) {
         printf("\n[Oficina Vazia] Todos os karts estão operacionais na pista!\n");
@@ -698,11 +689,6 @@ void exibir_fila_oficina(oficina* topo_oficina) {
     printf("===================================\n");
 }
 
-
-
-
-
-//Simulacao da Corrida (Módulo 1) 
 void realizar_corrida(node_corrida** inicio_fila, node* lista_pilotos, itens* estoque, int* cont_acidentes) {
     if (*inicio_fila == NULL) {
         printf("\n Não há corridas agendadas na fila! Agende uma corrida primeiro (Opção 1).\n");
@@ -734,7 +720,6 @@ void realizar_corrida(node_corrida** inicio_fila, node* lista_pilotos, itens* es
     printf("--------------------------------------------------\n");
     printf("3... 2... 1... VAI VAI VAI!!! \n\n");
 
-    // simulacao da corrida com base nos atributos dos pilotos e na dificuldade da pista
     node* piloto_atual = lista_pilotos;
 
     printf("--- DESEMPENHO NA PISTA ---\n");
@@ -783,7 +768,7 @@ void realizar_corrida(node_corrida** inicio_fila, node* lista_pilotos, itens* es
             } else if (piloto_atual->dado.item == 7) {  // casco azul
                 efeito_item[0] = 60;
                 efeito_item[1] = 30;
-            } else if (piloto_atual->dado.item == -1) {
+            } else if (piloto_atual->dado.item == -1) { // sem item
                 efeito_item[0] = 0;
                 efeito_item[1] = 0;
             }
@@ -802,13 +787,14 @@ void realizar_corrida(node_corrida** inicio_fila, node* lista_pilotos, itens* es
             contador++;
 
         }
-    }//Ao finalizar a corrida 
+    }
+
     piloto_atual = lista_pilotos;
     while (piloto_atual != NULL) {
         if (piloto_atual->dado.hp <= 0) {
             piloto_atual->dado.performance = 0;
             (*cont_acidentes)++;
-            printf("• %s sofreu um acidente e não completou a corrida!\n", piloto_atual->dado.piloto);//Verifica quais pilotos sofreram acidentes e não completaram a corrida
+            printf("• %s sofreu um acidente e não completou a corrida!\n", piloto_atual->dado.piloto);
         }
         if (piloto_atual->dado.performance > 0) {
             printf("• %s cruzou a linha de chegada (Score de Corrida: %d)\n", piloto_atual->dado.piloto, piloto_atual->dado.performance);
@@ -855,13 +841,9 @@ void realizar_corrida(node_corrida** inicio_fila, node* lista_pilotos, itens* es
     printf("\nCorrida finalizada! Pontos computados no Ranking da Temporada. \n");
     printf("==================================================\n");
 
-    // Remove a corrida executada da fila de pendentes (Central de Corridas)
     *inicio_fila = (*inicio_fila)->prox;
     free(corrida_atual);
 }
-
-
-//MODULO 6 - INFORMAÇÕES GERAIS
 
 void atualizar_pontuacao_corrida(node* lista_pilotos, int posicao, node* piloto) {
     int pontos_corrida = 0;
@@ -869,7 +851,7 @@ void atualizar_pontuacao_corrida(node* lista_pilotos, int posicao, node* piloto)
     switch (posicao) {
         case 1: 
             pontos_corrida = 15; piloto->dado.cont_trofeu++; 
-            break; // Ganha troféu no 1º lugar
+            break;
         case 2:
             pontos_corrida = 12; 
             break;
@@ -886,20 +868,17 @@ void atualizar_pontuacao_corrida(node* lista_pilotos, int posicao, node* piloto)
             pontos_corrida = 0;     
             break;
     }
-    // Atualiza a pontuação do piloto na lista
+
     piloto->dado.cont_trofeu += pontos_corrida;
-    // Exibe a posição e os pontos ganhos na temporada
-    printf("  %dº Lugar: %s | +%d Pontos na Temporada!\n", posicao, piloto->dado.piloto, pontos_corrida);
+    printf("%dº Lugar: %s | +%d Pontos na Temporada!\n", posicao, piloto->dado.piloto, pontos_corrida);
 }
 
-// Consulta: Exibe o Top 10 ou a classificação completa ordenada
 void exibir_ranking_campeonato(node* lista_pilotos) {
     if (lista_pilotos == NULL) {
         printf("\n[!] Nenhum piloto pontuou no campeonato ainda.\n");
         return;
     }
 
-    // Garante que a lista está ordenada pelos pontos/troféus acumulados antes de exibir
     ordenar(lista_pilotos); 
 
     printf("\n==================================================\n");
@@ -909,7 +888,6 @@ void exibir_ranking_campeonato(node* lista_pilotos) {
     node* atual = lista_pilotos;
     int pos = 1;
 
-    // Varre exibindo e limitando ao Top 10 se necessário, tratando empates visuais
     while (atual != NULL && pos <= 10) {
         printf(" %dº Lugar -> %s | Categoria: %s | Pontuação Histórica: %d Troféus\n",
                pos,
@@ -917,9 +895,9 @@ void exibir_ranking_campeonato(node* lista_pilotos) {
                (atual->dado.categ == 1) ? "Leve" : (atual->dado.categ == 2) ? "Médio" : "Pesado",
                atual->dado.cont_trofeu);
         
-        // Detecção simples de empate com o próximo da lista
+        // Detecção de empate
         if (atual->prox != NULL && atual->dado.cont_trofeu == atual->prox->dado.cont_trofeu) {
-            printf("  Empate técnico momentâneo com o próximo piloto!\n");
+            printf("Empate técnico momentâneo com o próximo piloto!\n");
         }
         
         pos++;
@@ -928,14 +906,13 @@ void exibir_ranking_campeonato(node* lista_pilotos) {
     printf("==================================================\n");
 }
 
-// Operação: Determina e premia o Campeão da Temporada
 void determinar_campeao_temporada(node* lista_pilotos) {
     if (lista_pilotos == NULL) {
-        printf("\n[!] Não há pilotos para disputar o título.\n");
+        printf("\nNão há pilotos para disputar o título.\n");
         return;
     }
 
-    ordenar(lista_pilotos); // O primeiro da lista após ordenar por troféus é o campeão
+    ordenar(lista_pilotos);
 
     printf("\n==============================================\n");
     printf("  O GRANDE CAMPEÃO DA TEMPORADA FOI DEFINIDO!\n");
@@ -945,4 +922,111 @@ void determinar_campeao_temporada(node* lista_pilotos) {
         (lista_pilotos->dado.categ == 1) ? "Leve" : (lista_pilotos->dado.categ == 2) ? "Médio" : "Pesado",
         lista_pilotos->dado.cont_trofeu);
     printf("====================================================\n");
+}
+
+// SISTEMA DE ARMAZENAMENTO
+
+void salvar(node* lista_pilotos) {
+    FILE* arq = fopen("pilotos.txt", "w");
+    if (arq == NULL) {
+        printf("Erro ao criar o arquivo de salvamento dos pilotos.\n");
+        return;
+    }
+
+    node* atual = lista_pilotos;
+    while (atual != NULL) {
+        fprintf(arq, "%s;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d\n",
+            atual->dado.piloto, atual->dado.categ, atual->dado.cont_trofeu,
+            atual->dado.st_pil, atual->dado.v_kart, atual->dado.ac,
+            atual->dado.ctrl, atual->dado.resist, atual->dado.st_kart,
+            atual->dado.hp, atual->dado.item, atual->dado.performance);
+
+        atual = atual->prox;
+    }
+
+    fclose(arq);
+    printf("Dados dos pilotos salvos com sucesso!\n");
+}
+
+void carregar(node** lista_pilotos, oficina** fila_oficina) {
+    FILE* arq = fopen("pilotos.txt", "r");
+    if (arq == NULL) {
+        printf("Nenhum save de pilotos encontrado. A temporada começará do zero.\n");
+        return;
+    }
+
+    char linha[256];
+    while (fgets(linha, sizeof(linha), arq)) {
+        node* novo = (node*)malloc(sizeof(node));
+        if (novo == NULL) break;
+
+        sscanf(linha, "%[^;];%d;%d;%d;%d;%d;%d;%d;%d;%d;%d;%d",
+            novo->dado.piloto, &novo->dado.categ, &novo->dado.cont_trofeu,
+            &novo->dado.st_pil, &novo->dado.v_kart, &novo->dado.ac,
+            &novo->dado.ctrl, &novo->dado.resist, &novo->dado.st_kart,
+            &novo->dado.hp, &novo->dado.item, &novo->dado.performance);
+
+        novo->prox = NULL;
+
+        if (*lista_pilotos == NULL) {
+            *lista_pilotos = novo;
+        } else {
+            node* temp = *lista_pilotos;
+            while (temp->prox != NULL) temp = temp->prox;
+            temp->prox = novo;
+        }
+
+        if (novo->dado.st_kart > 0) {
+            registrar_manutencao(fila_oficina, novo->dado.piloto, novo->dado.st_kart);
+        }
+    }
+
+    fclose(arq);
+    printf("Pilotos e fila da Oficina carregados com sucesso!\n");
+}
+
+void salvar_historico(node_historico* pilha_historico) {
+    FILE* arq = fopen("historico.txt", "w");
+    if (arq == NULL) {
+        printf("Erro ao criar o arquivo de histórico.\n");
+        return;
+    }
+
+    node_historico* atual = pilha_historico;
+    while (atual != NULL) {
+        fprintf(arq, "%s;%s;%d\n", atual->pista_nome, atual->vencedor_nome, atual->total_pilotos);
+        atual = atual->topo;
+    }
+
+    fclose(arq);
+    printf("Histórico salvo com sucesso!\n");
+}
+
+void carregar_historico(node_historico** pilha_historico) {
+    FILE* arq = fopen("historico.txt", "r");
+    if (arq == NULL) {
+        printf("Nenhum histórico antigo encontrado.\n");
+        return;
+    }
+
+    char linha[256];
+    node_historico* ultimo = NULL;
+
+    while (fgets(linha, sizeof(linha), arq)) {
+        node_historico* novo = (node_historico*)malloc(sizeof(node_historico));
+        if (novo == NULL) break;
+
+        sscanf(linha, "%[^;];%[^;];%d", novo->pista_nome, novo->vencedor_nome, &novo->total_pilotos);
+        novo->topo = NULL;
+
+        if (*pilha_historico == NULL) {
+            *pilha_historico = novo;
+        } else {
+            ultimo->topo = novo;
+        }
+        ultimo = novo;
+    }
+
+    fclose(arq);
+    printf("Histórico carregado com sucesso!\n");
 }
