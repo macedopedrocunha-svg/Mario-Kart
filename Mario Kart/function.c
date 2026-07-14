@@ -818,7 +818,6 @@ void menu_oficina(oficina** inicio_oficina, oficina** fim_oficina, node* lista_p
             printf("\n-------------------------------\n");
             printf("Registro de Karts\n");
             printf("-------------------------------\n");
-            // Supõe-se que print_pilotos imprima a lista e o status dos karts
             print_pilotos(lista_pilotos); 
             printf("-------------------------------\n");
             
@@ -833,9 +832,8 @@ void menu_oficina(oficina** inicio_oficina, oficina** fim_oficina, node* lista_p
                 node* atual_piloto = lista_pilotos;
                 int karts_adicionados = 0;
                 
-                // Varre toda a lista de pilotos
                 while (atual_piloto != NULL) {
-                    if (atual_piloto->dado.st_kart > 0) { // 1 (Danificado) ou 2 (Destruído)
+                    if (atual_piloto->dado.st_kart > 0) {
                         registrar_manutencao(inicio_oficina, fim_oficina, atual_piloto->dado.piloto, atual_piloto->dado.st_kart);
                         karts_adicionados++;
                     }
@@ -881,35 +879,27 @@ void registrar_manutencao(oficina** inicio, oficina** fim, char* nome, int statu
     novo->status_kart = status;
     novo->prox = NULL;
 
-    // CASO 1: Fila Vazia
     if (*inicio == NULL) {
         *inicio = novo;
         *fim = novo;
         return;
     }
 
-    // CASO 2: Inserção no topo (O novo tem prioridade MAIOR que o primeiro da fila)
-    // Ex: O novo é 2 (Destruído) e o primeiro da fila é 1 (Danificado)
     if (status > (*inicio)->status_kart) {
         novo->prox = *inicio;
         *inicio = novo;
         return;
     }
 
-    // CASO 3: Inserção no meio ou no final (Busca a posição correta por prioridade)
     oficina* atual = *inicio;
     
-    // Caminha pela fila enquanto o próximo nó existir E tiver prioridade maior ou igual ao novo
     while (atual->prox != NULL && atual->prox->status_kart >= status) {
         atual = atual->prox;
     }
 
-    // Encontrou a posição! Encaixa o novo nó
     novo->prox = atual->prox;
     atual->prox = novo;
 
-    // CASO ESPECIAL: Se o nó que acabamos de inserir for parar no exato final da fila,
-    // nós precisamos avisar o ponteiro 'fim' sobre o novo último lugar.
     if (novo->prox == NULL) {
         *fim = novo;
     }
@@ -925,12 +915,10 @@ void iniciar_reparo(oficina** inicio, oficina** fim, node* lista_pilotos) {
     printf(" REPAROS CONCLUÍDOS! \n");
     printf("===================================\n");
 
-    // Lógica Clássica de FILA (FIFO): Remove sempre do INÍCIO
     while (*inicio != NULL) {
         oficina* repara_agora = *inicio;
         node* p_atual = lista_pilotos;
 
-        // Procura o piloto na lista para arrumar o status dele
         while (p_atual != NULL) {
             if (strcmp(p_atual->dado.piloto, repara_agora->piloto_nome) == 0) {
                 p_atual->dado.st_kart = 0;
@@ -941,10 +929,8 @@ void iniciar_reparo(oficina** inicio, oficina** fim, node* lista_pilotos) {
             p_atual = p_atual->prox;
         }     
 
-        // O início da fila avança para o próximo nó
         *inicio = (*inicio)->prox;
         
-        // Proteção essencial da Fila: Se esvaziou, o ponteiro de fim precisa resetar para NULL
         if (*inicio == NULL) {
             *fim = NULL;
         }
