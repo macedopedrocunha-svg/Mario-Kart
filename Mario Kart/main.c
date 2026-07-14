@@ -9,20 +9,21 @@ int main() {
     setlocale(LC_ALL, "Portuguese");
     srand(time(NULL));
 
-    node* lista_pilotos = NULL;            // 1. Lista Encadeada
-    node_corrida* fila_corrida_inicio = NULL; // 2. Fila (Início)
-    node_corrida* fila_corrida_fim = NULL;    // 2. Fila (Fim)
-    node_historico* pilha_historico = NULL;// 3. Pilha de Histórico
-    oficina* fila_oficina = NULL;     // 4. Fila de Prioridade da Oficina
-
-    itens estoque_central;
-    inicializar_estoque(&estoque_central);
-
+    node* lista_pilotos = NULL;
+    node_corrida* fila_corrida = NULL;
+    node_historico* pilha_historico = NULL;
+    oficina* fila_oficina_inicio = NULL;
+    oficina* fila_oficina_fim = NULL;
+    corrida* estatisticas_pistas = alocar_estatisticas();
+    itens* estoque_central = alocar_estoque();
+    
     printf("\nIniciando o Sistema FMKR...\n");
-    carregar_pilotos_e_oficina(&lista_pilotos, &fila_oficina);
+    inicializar_estoque(estoque_central);
+    carregar(&fila_oficina_inicio, &fila_oficina_fim, &lista_pilotos);
+    carregar_pistas(estatisticas_pistas);
     carregar_historico(&pilha_historico);
 
-    int resp_menu, cont_acidentes = 0;
+    int resp_menu;
     do {
         print_menu();
         printf("Escolha uma opção: ");
@@ -35,29 +36,34 @@ int main() {
         switch (resp_menu) {
         case 1: {
             int sub;
-            printf("\n--- MÓDULO 1: CORRIDAS ---\n");
-            printf("1 - Agendar Nova Corrida\n");
-            printf("2 - Iniciar Próxima Corrida da Fila\n");
-            printf("Escolha: ");
-            scanf("%d", &sub);
-            getchar();
-            if (sub == 1) {
-                cadastrar_corrida(&fila_corrida_inicio);
-            } else if (sub == 2) {
-                realizar_corrida(&fila_corrida_inicio, lista_pilotos, &estoque_central, &cont_acidentes);
-            } else {
-                printf("Opção inválida.\n");
-            }
+            do {
+                printf("\n--- MÓDULO 1: CORRIDAS ---\n");
+                printf("1 - Agendar Nova Corrida\n");
+                printf("2 - Iniciar Próxima Corrida da Fila\n");
+                printf("0 - Voltar\n");
+                printf("Escolha: ");
+                scanf("%d", &sub);
+                getchar();
+                if (sub == 1) {
+                    cadastrar_corrida(&fila_corrida);
+                } else if (sub == 2) {
+                    realizar_corrida(&fila_corrida, lista_pilotos, estoque_central, estatisticas_pistas);
+                } else if (sub == 0) {
+                    break;
+                } else {
+                    printf("Opção inválida.\n");
+                }
+            } while (sub != 0);
             break;
         }
         case 2:
-            menu_oficina(&fila_oficina, lista_pilotos);
+            menu_oficina(&fila_oficina_inicio, &fila_oficina_fim, lista_pilotos);
             break;
         case 3:
             exibir_ranking_campeonato(lista_pilotos);
             break;
         case 4:
-            exibir_historico(lista_pilotos);
+            exibir_historico(estatisticas_pistas, lista_pilotos);
             break;
         case 5:
             criar_personagem(&lista_pilotos);
@@ -69,13 +75,16 @@ int main() {
             pers_banidos();
             break;
         case 8:
-            menu_itens_gerenciar(lista_pilotos, &estoque_central);
+            menu_itens_gerenciar(lista_pilotos, estoque_central);
+            break;
+        case 9:
+            determinar_campeao_temporada(lista_pilotos);
+            inicializar_estoque(estoque_central);
             break;
         case 0:
-            determinar_campeao_temporada(lista_pilotos);
-
             printf("\nSalvando o progresso da temporada...\n");
-            salvar_pilotos(lista_pilotos);
+            salvar(lista_pilotos);
+            salvar_pistas(estatisticas_pistas);
             salvar_historico(pilha_historico);
 
             printf("Precione ENTER para sair... ");
@@ -89,22 +98,12 @@ int main() {
     } while (resp_menu != 0);
 
     // Desalocação de memória ao sair
-    while (lista_pilotos != NULL) {
-        node* aux = lista_pilotos; lista_pilotos = lista_pilotos->prox;
-        free(aux);
-    }
-    while (fila_corrida_inicio != NULL) {
-        node_corrida* aux = fila_corrida_inicio; fila_corrida_inicio = fila_corrida_inicio->prox;
-        free(aux);
-    }
-    while (pilha_historico != NULL) {
-        node_historico* aux = pilha_historico; pilha_historico = pilha_historico->topo;
-        free(aux);
-    }
-    while (fila_oficina != NULL) {
-        oficina* aux = fila_oficina; fila_oficina = fila_oficina->prox;
-        free(aux);
-    }
+    liberar_pilotos(&lista_pilotos);
+    liberar_corridas(&fila_corrida);
+    liberar_estatisticas(&estatisticas_pistas);
+    liberar_historico(&pilha_historico);
+    liberar_oficina(&fila_oficina_inicio);
+    liberar_estoque(&estoque_central);
 
     return 0;
 }
